@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="vn.asquare.ufie.MainActivity" >
+
+    <item
+        android:id="@+id/mItem_Browser"
+        app:showAsAction="always"
+        android:title="Browser"
+        android:icon="@drawable/ic_search_white_24dp"
+        />
+
+</menu>
