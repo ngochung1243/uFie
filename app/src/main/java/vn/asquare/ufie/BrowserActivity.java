@@ -265,7 +265,7 @@ public class BrowserActivity extends Activity implements WifiP2PBroardcast.WifiP
         final WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = device.deviceAddress;
         config.wps.setup = WpsInfo.PBC;
-        config.groupOwnerIntent = 0;
+        config.groupOwnerIntent = 15;
 
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
 
