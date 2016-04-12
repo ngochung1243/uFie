@@ -40,9 +40,13 @@ public class ReceiveSocketAsync implements Runnable{
         try {
             InputStream receiveInputStream = mReceiveSocket.getInputStream();
             while (true){
+                if (mReceiveSocket.isClosed()){
+                    break;
+                }
+
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-                FileTransferService.copyFile(receiveInputStream, os);
+                FileTransferService.receiveFile(receiveInputStream, os);
 
                 os.flush();
                 if (os.size() > 0){
@@ -56,10 +60,9 @@ public class ReceiveSocketAsync implements Runnable{
                     f.createNewFile();
 
                     os.writeTo(new FileOutputStream(f));
-                    mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(f)));
+                    mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE , Uri.fromFile(f)));
                     ((SocketReceiverDataListener)mContext).onReceiveData(f.getAbsolutePath());
                 }
-                break;
             }
 
         } catch (IOException e) {
