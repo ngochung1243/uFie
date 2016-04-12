@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -45,7 +46,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class MainActivity extends AppCompatActivity implements ReceiveSocketAsync.SocketReceiverDataListener, WifiP2PBroardcast.WifiP2PBroadcastListener {
 
-    public static enum State{
+    public static enum State {
         StateDefault,
         StateActive,
         StatePassive
@@ -76,18 +77,20 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         setContentView(R.layout.activity_main);
 
         mContext = this;
-        mProgess = new ProgressDialog(this){
+        mProgess = new ProgressDialog(this) {
             @Override
             public void onBackPressed() {
-                if (mProgess.isShowing()){
+                if (mProgess.isShowing()) {
                     mProgess.dismiss();
                 }
-            };
+            }
+
+            ;
         };
 
         mState = State.StateDefault;
 
-        lvImage = (ListView)findViewById(R.id.lvImage);
+        lvImage = (ListView) findViewById(R.id.lvImage);
         lvImageAdapter = new ImageListAdapter(this, R.layout.listview_item, image_urls);
         lvImage.setAdapter(lvImageAdapter);
         lvImage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -105,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         setManager();
     }
 
-    private void setManager(){
+    private void setManager() {
         mManager = (WifiP2pManager) getSystemService(WIFI_P2P_SERVICE);
 
         mChannel = mManager.initialize(this, getMainLooper(), null);
@@ -125,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         registerReceiver(mBroadcast, filter);
     }
 
-    private void advertiseWifiP2P(){
+    private void advertiseWifiP2P() {
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
 
             @Override
@@ -142,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         });
     }
 
-    private void disconnectFromPeer(){
+    private void disconnectFromPeer() {
         mManager.removeGroup(mChannel, new WifiP2pManager.ActionListener() {
 
             @Override
@@ -192,8 +195,8 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             View v = convertView;
             LayoutInflater inflater = getLayoutInflater();
             v = inflater.inflate(mResource, null);
-            ImageView imageView = (ImageView)v.findViewById(R.id.imvIcon);
-            TextView txtView = (TextView)v.findViewById(R.id.tvLabel);
+            ImageView imageView = (ImageView) v.findViewById(R.id.imvIcon);
+            TextView txtView = (TextView) v.findViewById(R.id.tvLabel);
             txtView.setText("image_" + position);
 
             final int THUMBSIZE = 64;
@@ -206,7 +209,6 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             return v;
         }
     }
-
 
 
     @Override
@@ -261,15 +263,15 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         try {
             //Samsungs:
             File folder = new File(Environment.getExternalStorageDirectory() + File.separator + "DCIM/Camera");
-            if(!folder.exists()){ //other phones:
+            if (!folder.exists()) { //other phones:
                 File[] subfolders = new File(Environment.getExternalStorageDirectory() + File.separator + "DCIM").listFiles();
-                for(File subfolder : subfolders){
-                    if(subfolder.getAbsolutePath().contains("100")){
+                for (File subfolder : subfolders) {
+                    if (subfolder.getAbsolutePath().contains("100")) {
                         folder = subfolder;
                         break;
                     }
                 }
-                if(!folder.exists())
+                if (!folder.exists())
                     return null;
             }
 
@@ -291,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
     }
 
-    public static Bitmap createCorrectBitmap(String filePath, Bitmap oldbm){
+    public static Bitmap createCorrectBitmap(String filePath, Bitmap oldbm) {
 
         Bitmap newbm;
 
@@ -320,16 +322,16 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         }
         Matrix matrix = new Matrix();
         matrix.postRotate(rotate);
-        newbm = Bitmap.createBitmap(oldbm , 0, 0, oldbm.getWidth(), oldbm.getHeight(), matrix, true);
+        newbm = Bitmap.createBitmap(oldbm, 0, 0, oldbm.getWidth(), oldbm.getHeight(), matrix, true);
 
         return newbm;
     }
 
-    private void compressToGzipFile(String sourceFilePath, String desFilePath){
+    private void compressToGzipFile(String sourceFilePath, String desFilePath) {
 
         byte[] buffer = new byte[1024];
 
-        try{
+        try {
 
             GZIPOutputStream gzos =
                     new GZIPOutputStream(new FileOutputStream(sourceFilePath));
@@ -347,15 +349,15 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             gzos.finish();
             gzos.close();
 
-        }catch(IOException ex){
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    private void decompressFromGzipFile(String sourceFilePath, String desFilePath){
+    private void decompressFromGzipFile(String sourceFilePath, String desFilePath) {
         byte[] buffer = new byte[1024];
 
-        try{
+        try {
 
             GZIPInputStream gzis =
                     new GZIPInputStream(new FileInputStream(sourceFilePath));
@@ -371,12 +373,12 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             gzis.close();
             out.close();
 
-        }catch(IOException ex){
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    private void sendImageCapture(){
+    private void sendImageCapture() {
 //		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 //        //intent.setType("image/*");
 //        File photoFile = null;
@@ -414,17 +416,40 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         }
     }
 
-    private void sendImageInGalery(){
+    private void sendImageInGalery() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, 100);
     }
 
+    private String createImageWithData(byte[] data) {
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream(data.length);
+        os.write(data, 0, data.length);
+
+        try {
+            final File f = new File(Environment.getExternalStorageDirectory() + "/"
+                    + mContext.getPackageName() + "/wifip2pImageShare-" + System.currentTimeMillis()
+                    + ".jpg");
+
+            File dirs = new File(f.getParent());
+            if (!dirs.exists())
+                dirs.mkdirs();
+            f.createNewFile();
+            os.writeTo(new FileOutputStream(f));
+            mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(f)));
+            return f.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO Auto-generated method stub
-        if (resultCode == RESULT_OK){
-            if (requestCode == 100){
+        if (resultCode == RESULT_OK) {
+            if (requestCode == 100) {
 
                 mProgess.setTitle("Send Picture");
                 mProgess.setMessage("Wait for send...");
@@ -448,8 +473,6 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
                 //File imageFile = getLastFromDCIM();
                 //mImageUri = Uri.fromFile(imageFile);
-
-
 
 
                 Thread send = new Thread(new Runnable() {
@@ -538,15 +561,15 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 //					e1.printStackTrace();
 //				}
 
-            }else if (requestCode == 20){
+            } else if (requestCode == 20) {
 
                 mBroadcast.mListener = this;
 
-                if (mState == State.StateActive){
+                if (mState == State.StateActive) {
                     mProgess.setTitle("Receive Picture");
                     mProgess.setMessage("Wait for picture...");
                     mProgess.show();
-                }else if (mState == State.StatePassive)
+                } else if (mState == State.StatePassive)
                     sendImageCapture();
                 //sendImageInGalery();
                 mState = State.StateDefault;
@@ -555,37 +578,25 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     }
 
     @Override
-    public void onReceiveData(String path) {
+    public void onReceiveData(byte[] data) {
+
+        String imagePath = createImageWithData(data);
         Handler hd = new Handler(mContext.getMainLooper());
-        String imagePath;
-        try {
-            File imageFile = createImageFile(null, ".jpg");
-            //String imagePath = imageFile.getAbsolutePath();
-            imagePath = path;
-            //decompressFromGzipFile(path, imagePath);
+        image_urls.add(imagePath);
 
-            image_urls.add(imagePath);
+        hd.post(new Runnable() {
 
-            hd.post(new Runnable() {
-
-                @Override
-                public void run() {
-                    // TODO Auto-generated method stub
-                    if (mProgess.isShowing()){
-                        mProgess.dismiss();
-                    }
-                    lvImageAdapter.notifyDataSetChanged();
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                if (mProgess.isShowing()) {
+                    mProgess.dismiss();
                 }
-            });
+                lvImageAdapter.notifyDataSetChanged();
+            }
+        });
 
-            disconnectFromPeer();
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-
+        disconnectFromPeer();
     }
 
     @Override
@@ -599,7 +610,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // TODO Auto-generated method stub
-        if (item.getItemId() == R.id.mItem_Browser){
+        if (item.getItemId() == R.id.mItem_Browser) {
             Intent intent = new Intent(this, BrowserActivity.class);
             startActivityForResult(intent, 20);
         }
@@ -610,7 +621,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     @Override
     public void onConnection() {
         // TODO Auto-generated method stub
-        if (mState == State.StatePassive){
+        if (mState == State.StatePassive) {
             sendImageCapture();
             //sendImageInGalery();
         }
