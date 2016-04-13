@@ -210,7 +210,7 @@ public class BrowserActivity extends Activity implements WifiP2PBroardcast.WifiP
 
         setServiceRequest();
 
-        mManager.removeServiceRequest(mChannel, serviceRequest , new WifiP2pManager.ActionListener() {
+        mManager.removeServiceRequest(mChannel, serviceRequest, new WifiP2pManager.ActionListener() {
 
             @Override
             public void onSuccess() {
@@ -293,8 +293,10 @@ public class BrowserActivity extends Activity implements WifiP2PBroardcast.WifiP
     @Override
     public void onConnection() {
         // TODO Auto-generated method stub
-        setResult(Activity.RESULT_OK);
-        finish();
+        if (MainActivity.mState == MainActivity.State.StatePassive) {
+            setResult(Activity.RESULT_OK);
+            finish();
+        }
     }
 
     @Override
