@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-public class MainActivity extends AppCompatActivity implements ReceiveSocketAsync.SocketReceiverDataListener, WifiP2PBroardcast.WifiP2PBroadcastListener {
+public class MainActivity extends AppCompatActivity implements ReceiveSocketAsync.SocketReceiverDataListener, WifiP2PBroadcast.WifiP2PBroadcastListener {
 
     public static enum State {
         StateDefault,
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
     public static WifiP2pManager mManager;
     public static WifiP2pManager.Channel mChannel;
-    public static WifiP2PBroardcast mBroadcast;
+    public static WifiP2PBroadcast mBroadcast;
     public static IntentFilter filter = new IntentFilter();
 
     ListView lvImage;
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
         advertiseWifiP2P();
 
-        mBroadcast = new WifiP2PBroardcast(mManager, mChannel, this);
+        mBroadcast = new WifiP2PBroadcast(mManager, mChannel, this);
 
         mBroadcast.mListener = this;
 
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         registerReceiver(mBroadcast, filter);
     }
 
-    private void advertiseWifiP2P() {
+    public static void advertiseWifiP2P() {
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
 
             @Override

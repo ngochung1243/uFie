@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class BrowserActivity extends Activity implements WifiP2PBroardcast.WifiP2PBroadcastListener {
+public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2PBroadcastListener {
 
     DeviceListAdapter deviceListAdapter;
     ListView lvDevice;
@@ -33,7 +33,7 @@ public class BrowserActivity extends Activity implements WifiP2PBroardcast.WifiP
     String DETECT = "Demo_WifiP2P";
     String STATEDETECT = "ON";
 
-    WifiP2PBroardcast mBroadcast;
+    WifiP2PBroadcast mBroadcast;
     IntentFilter filter = new IntentFilter();
 
     WifiP2pManager mManager;
