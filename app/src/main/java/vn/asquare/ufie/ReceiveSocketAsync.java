@@ -48,8 +48,6 @@ public class ReceiveSocketAsync implements Runnable{
                 if (os.size() > 0){
                     ((SocketReceiverDataListener)mContext).onReceiveData(os.toByteArray());
                 }
-
-                break;
             }
 
         } catch (IOException e) {
