@@ -35,9 +35,13 @@ public class ReceiveSocketAsync implements Runnable{
         try {
             InputStream receiveInputStream = mReceiveSocket.getInputStream();
             while (true){
+                if (mReceiveSocket.isClosed()){
+                    break;
+                }
+
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-                FileTransferService.copyFile(receiveInputStream, os);
+                FileTransferService.receiveFile(receiveInputStream, os);
 
                 os.flush();
 
@@ -60,7 +64,7 @@ public class ReceiveSocketAsync implements Runnable{
     }
 
     public void stop(){
-
+        t.interrupt();
     }
 
     public interface SocketReceiverDataListener{

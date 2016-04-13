@@ -33,7 +33,7 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
     public void send(final InputStream is){
         try {
             final OutputStream os = mSendSocket.getOutputStream();
-            FileTransferService.copyFile(is, os);
+            FileTransferService.sendFile(is, os);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
