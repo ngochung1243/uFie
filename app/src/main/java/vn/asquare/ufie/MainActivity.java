@@ -38,7 +38,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -54,14 +53,12 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
     public static Context mContext;
 
-    public static WifiP2pManager mManager;
-    public static WifiP2pManager.Channel mChannel;
-    public static WifiP2PBroadcast mBroadcast;
+    MyBundle MyBundle;
+
     public static IntentFilter filter = new IntentFilter();
 
     ListView lvImage;
     ImageListAdapter lvImageAdapter;
-    List<String> image_urls = new ArrayList<String>();
 
     public boolean firstDiscover = true;
     ProgressDialog mProgess;
@@ -77,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         setContentView(R.layout.activity_main);
 
         mContext = this;
+
         mProgess = new ProgressDialog(this) {
             @Override
             public void onBackPressed() {
@@ -91,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         mState = State.StateDefault;
 
         lvImage = (ListView) findViewById(R.id.lvImage);
-        lvImageAdapter = new ImageListAdapter(this, R.layout.listview_item, image_urls);
+        lvImageAdapter = new ImageListAdapter(this, R.layout.listview_item, MyBundle.image_urls);
         lvImage.setAdapter(lvImageAdapter);
         lvImage.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -100,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
                                     int position, long id) {
                 // TODO Auto-generated method stub
                 Intent imageViewIntent = new Intent(getApplicationContext(), ShowImageActivity.class);
-                imageViewIntent.putExtra("ImagePath", image_urls.get(position));
+                imageViewIntent.putExtra("ImagePath", MyBundle.image_urls.get(position));
                 startActivity(imageViewIntent);
             }
         });
@@ -110,10 +108,10 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
     private void setBroadcast() {
 
-        mBroadcast = new WifiP2PBroadcast(this);
-        mBroadcast.setManager();
+        MyBundle.mBroadcast = new WifiP2PBroadcast(this);
+        MyBundle.mBroadcast.setManager();
 
-        mBroadcast.mListener = this;
+        MyBundle.mBroadcast.mListener = this;
 
         filter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         filter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
@@ -121,14 +119,13 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         filter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         filter.addAction(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION);
 
-        mBroadcast.register(filter);
-        mBroadcast.advertiseWifiP2P();
+        MyBundle.mBroadcast.register(filter);
+        MyBundle.mBroadcast.advertiseWifiP2P();
     }
 
     public class ImageListAdapter extends ArrayAdapter<String> {
         Context mContext;
         int mResource;
-        List<String> image_urls;
 
         public ImageListAdapter(Context context, int resource,
                                 List<String> objects) {
@@ -136,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             // TODO Auto-generated constructor stub
             mContext = context;
             mResource = resource;
-            image_urls = objects;
+            MyBundle.image_urls = objects;
         }
 
         @Override
@@ -150,10 +147,10 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             txtView.setText("image_" + position);
 
             final int THUMBSIZE = 64;
-            Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(image_urls.get(position)),
+            Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(MyBundle.image_urls.get(position)),
                     THUMBSIZE, THUMBSIZE);
 
-            Bitmap bm = createCorrectBitmap(image_urls.get(position), ThumbImage);
+            Bitmap bm = createCorrectBitmap(MyBundle.image_urls.get(position), ThumbImage);
 
             imageView.setImageBitmap(bm);
             return v;
@@ -171,8 +168,8 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     protected void onResume() {
         // TODO Auto-generated method stub
         super.onResume();
-        if (mBroadcast != null){
-            mBroadcast.mListener = this;
+        if (MyBundle.mBroadcast != null){
+            MyBundle.mBroadcast.mListener = this;
         }
     }
 
@@ -438,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
                             InputStream is;
 
                             is = cr.openInputStream(mImageUri);
-                            mBroadcast.send(is);
+                            MyBundle.mBroadcast.send(is);
 
                             File image = new File(mImagePath);
                             image.delete();
@@ -466,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 //
 //					ByteArrayInputStream isBm = new ByteArrayInputStream(barray);
 //
-//					mBroadcast.send(isBm);
+//					MyBundle.mBroadcast.send(isBm);
 //
 //				} catch (FileNotFoundException e) {
 //					// TODO Auto-generated catch block
@@ -498,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 //							InputStream is;
 //							try {
 //								is = cr.openInputStream(compressUri);
-//								mBroadcast.send(is);
+//								MyBundle.mBroadcast.send(is);
 //								mProgess.dismiss();
 //								advertiseWifiP2P();
 //
@@ -533,7 +530,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
         String imagePath = createImageWithData(data);
         Handler hd = new Handler(mContext.getMainLooper());
-        image_urls.add(imagePath);
+        MyBundle.image_urls.add(imagePath);
 
         hd.post(new Runnable() {
 
@@ -547,7 +544,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             }
         });
 
-        mBroadcast.disconnectFromPeer();
+        MyBundle.mBroadcast.disconnectFromPeer();
     }
 
     @Override
@@ -573,7 +570,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     public void onConnection() {
         // TODO Auto-generated method stub
 
-        mBroadcast.mP2PHandle.setReceiveDataListener(this);
+        MyBundle.mBroadcast.mP2PHandle.setReceiveDataListener(this);
 
         if (mState == State.StatePassive) {
             sendImageCapture();
@@ -589,7 +586,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     @Override
     public void onDisconnect() {
         // TODO Auto-generated method stub
-        mBroadcast.advertiseWifiP2P();
+        MyBundle.mBroadcast.advertiseWifiP2P();
         mState = State.StateDefault;
     }
 }
