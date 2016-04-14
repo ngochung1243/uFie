@@ -68,8 +68,8 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
             }
         });
 
-        startRegistration();
-        searchPeer();
+        //startRegistration();
+        mBroadcast.advertiseWifiP2P();
     }
 
 
@@ -267,19 +267,7 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
         config.wps.setup = WpsInfo.PBC;
         config.groupOwnerIntent = 15;
 
-        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
-
-            @Override
-            public void onSuccess() {
-                // TODO Auto-generated method stub
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                // TODO Auto-generated method stub
-
-            }
-        });
+        mBroadcast.connectPeer(config);
     }
 
     @Override
@@ -297,11 +285,15 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
             setResult(Activity.RESULT_OK);
             finish();
         }
+
+        mBroadcast.mP2PHandle.setReceiveDataListener((ReceiveSocketAsync.SocketReceiverDataListener)MainActivity.mContext);
     }
 
     @Override
     public void onDisconnect() {
         // TODO Auto-generated method stub
 
+        mBroadcast.advertiseWifiP2P();
+        MainActivity.mState = MainActivity.State.StateDefault;
     }
 }

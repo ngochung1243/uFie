@@ -1,7 +1,5 @@
 package vn.asquare.ufie;
 
-import android.content.Context;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,17 +14,14 @@ public class ReceiveSocketAsync implements Runnable{
 
     Socket mReceiveSocket;
 
-    SocketReceiverDataListener mReceiveListener;
-
-    Context mContext;
+    public SocketReceiverDataListener mReceiveListener;
 
     Thread t;
 
-    public ReceiveSocketAsync(SocketReceiverDataListener receiveListener, Socket receiveSocket, Context context) {
+    public ReceiveSocketAsync(SocketReceiverDataListener receiveListener, Socket receiveSocket) {
         // TODO Auto-generated constructor stub
         mReceiveSocket = receiveSocket;
         mReceiveListener = receiveListener;
-        mContext = context;
     }
 
     @Override
@@ -46,7 +41,9 @@ public class ReceiveSocketAsync implements Runnable{
                 os.flush();
 
                 if (os.size() > 0){
-                    ((SocketReceiverDataListener)mContext).onReceiveData(os.toByteArray());
+                    if (mReceiveListener != null){
+                        mReceiveListener.onReceiveData(os.toByteArray());
+                    }
                 }
             }
 

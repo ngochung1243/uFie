@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         StatePassive
     }
 
-    Context mContext;
+    public static Context mContext;
 
     public static WifiP2pManager mManager;
     public static WifiP2pManager.Channel mChannel;
@@ -105,17 +105,13 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             }
         });
 
-        setManager();
+        setBroadcast();
     }
 
-    private void setManager() {
-        mManager = (WifiP2pManager) getSystemService(WIFI_P2P_SERVICE);
+    private void setBroadcast() {
 
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-
-        advertiseWifiP2P();
-
-        mBroadcast = new WifiP2PBroadcast(mManager, mChannel, this);
+        mBroadcast = new WifiP2PBroadcast(this);
+        mBroadcast.setManager();
 
         mBroadcast.mListener = this;
 
@@ -125,54 +121,8 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         filter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         filter.addAction(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION);
 
-        registerReceiver(mBroadcast, filter);
-    }
-
-    public static void advertiseWifiP2P() {
-        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-
-            @Override
-            public void onSuccess() {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                // TODO Auto-generated method stub
-
-            }
-        });
-    }
-
-    private void disconnectFromPeer() {
-        mManager.removeGroup(mChannel, new WifiP2pManager.ActionListener() {
-
-            @Override
-            public void onSuccess() {
-                // TODO Auto-generated method stub
-                mManager.cancelConnect(mChannel, new WifiP2pManager.ActionListener() {
-
-                    @Override
-                    public void onSuccess() {
-                        // TODO Auto-generated method stub
-
-                    }
-
-                    @Override
-                    public void onFailure(int reason) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                // TODO Auto-generated method stub
-
-            }
-        });
+        mBroadcast.register(filter);
+        mBroadcast.advertiseWifiP2P();
     }
 
     public class ImageListAdapter extends ArrayAdapter<String> {
@@ -221,6 +171,9 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     protected void onResume() {
         // TODO Auto-generated method stub
         super.onResume();
+        if (mBroadcast != null){
+            mBroadcast.mListener = this;
+        }
     }
 
     private File createImageFile(String prefix, String suffix) throws IOException {
@@ -563,8 +516,6 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
             } else if (requestCode == 20) {
 
-                mBroadcast.mListener = this;
-
                 if (mState == State.StateActive) {
                     mProgess.setTitle("Receive Picture");
                     mProgess.setMessage("Wait for picture...");
@@ -596,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             }
         });
 
-        disconnectFromPeer();
+        mBroadcast.disconnectFromPeer();
     }
 
     @Override
@@ -621,6 +572,9 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     @Override
     public void onConnection() {
         // TODO Auto-generated method stub
+
+        mBroadcast.mP2PHandle.setReceiveDataListener(this);
+
         if (mState == State.StatePassive) {
             sendImageCapture();
             //sendImageInGalery();
@@ -635,6 +589,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     @Override
     public void onDisconnect() {
         // TODO Auto-generated method stub
-        advertiseWifiP2P();
+        mBroadcast.advertiseWifiP2P();
+        mState = State.StateDefault;
     }
 }

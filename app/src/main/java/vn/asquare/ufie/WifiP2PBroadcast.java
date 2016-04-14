@@ -3,7 +3,9 @@ package vn.asquare.ufie;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.NetworkInfo;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.widget.Toast;
@@ -15,19 +17,98 @@ import java.io.InputStream;
  */
 public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManager.PeerListListener, P2PHandleNetwork.P2PHandleNetworkListener {
 
-    WifiP2pManager mManager;
-    WifiP2pManager.Channel mChannel;
-    Context mContext;
+    WifiP2pManager mManager = null;
+    WifiP2pManager.Channel mChannel = null;
+
+    public Context mContext;
+
     public WifiP2PBroadcastListener mListener = null;
+
     P2PHandleNetwork mP2PHandle;
 
-    public WifiP2PBroadcast(WifiP2pManager manager, WifiP2pManager.Channel channel, MainActivity activity){
-        mManager = manager;
-        mChannel = channel;
+    public WifiP2PBroadcast(MainActivity activity){
         mContext = activity;
 
-        mP2PHandle = new P2PHandleNetwork(mContext);
+        mP2PHandle = new P2PHandleNetwork();
         mP2PHandle.mListener = this;
+    }
+
+    public void setManager() {
+
+        mManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
+        mChannel = mManager.initialize(mContext, mContext.getMainLooper(), null);
+    }
+
+    public void register(IntentFilter filter){
+
+        mContext.registerReceiver(this, filter);
+    }
+
+    public void advertiseWifiP2P() {
+
+        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+
+            @Override
+            public void onSuccess() {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+    }
+
+    public void connectPeer(WifiP2pConfig config){
+
+        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
+
+            @Override
+            public void onSuccess() {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+    }
+
+    public void disconnectFromPeer() {
+        mManager.removeGroup(mChannel, new WifiP2pManager.ActionListener() {
+
+            @Override
+            public void onSuccess() {
+                // TODO Auto-generated method stub
+                mManager.cancelConnect(mChannel, new WifiP2pManager.ActionListener() {
+
+                    @Override
+                    public void onSuccess() {
+                        // TODO Auto-generated method stub
+
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                        // TODO Auto-generated method stub
+
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+
+        mP2PHandle.disconnect();
     }
 
     @Override
@@ -51,16 +132,17 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
 
             NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
             Toast.makeText(mContext.getApplicationContext(), "Connection change", Toast.LENGTH_SHORT).show();
-            if (networkInfo.isConnected()){
+
+            NetworkInfo.State state = networkInfo.getState();
+            if (state == NetworkInfo.State.CONNECTED){
 
                 if (MainActivity.mState == MainActivity.State.StateDefault){
                     MainActivity.mState = MainActivity.State.StatePassive;
                 }
 
                 mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener)mP2PHandle);
-            }else{
+            }else if (state == NetworkInfo.State.DISCONNECTED){
                 mListener.onDisconnect();
-                disconnect();
             }
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             // Respond to this device's wifi state changing
@@ -74,9 +156,6 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
                 Toast.makeText(mContext.getApplicationContext(), "Discovery start", Toast.LENGTH_SHORT).show();
             }else if (discoverState == WifiP2pManager.WIFI_P2P_DISCOVERY_STOPPED){
                 Toast.makeText(mContext.getApplicationContext(), "Discovery stop", Toast.LENGTH_SHORT).show();
-                if (MainActivity.mState == MainActivity.State.StateActive){
-                    MainActivity.advertiseWifiP2P();
-                }
             }
         }
     }
@@ -91,10 +170,6 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
 
     public void send(InputStream is){
         mP2PHandle.send(is);
-    }
-
-    public void disconnect(){
-        mP2PHandle.disconnect();
     }
 
     @Override
