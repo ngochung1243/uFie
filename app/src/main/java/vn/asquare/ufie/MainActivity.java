@@ -438,7 +438,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
                             MyBundle.mBroadcast.send(is);
 
                             File image = new File(mImagePath);
-                            image.delete();
+                            // image.delete();
                             mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(image)));
                             mProgess.dismiss();
 
