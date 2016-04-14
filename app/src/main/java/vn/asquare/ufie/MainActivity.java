@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -18,6 +19,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -173,6 +175,8 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         }
     }
 
+    String mCurrentPhotoPath;
+
     private File createImageFile(String prefix, String suffix) throws IOException {
         // Create an image file name
 //		 String mprefix = prefix;
@@ -202,6 +206,8 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(image)));
 
         // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(image)));
         mImagePath = image.getAbsolutePath();
         mImageUri = Uri.fromFile(image);
 
@@ -395,6 +401,63 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         }
     }
 
+    ArrayList<String> GalleryList = new ArrayList<>();
+    ArrayList<String> GalleryListData = new ArrayList<>();
+
+    /**
+     * tim ảnh trong galery , so sánh vs ảnh chụp rồi xóa nếu trúng và xóa ảnh vừa gửi
+     *
+     * @param file
+     */
+    private void FillPhotoList(File file) {
+        // initialize the list!
+        GalleryList.clear();
+        String[] projection = {MediaStore.Images.ImageColumns.DISPLAY_NAME, MediaStore.Images.ImageColumns.DATA};
+        for (int i = 0; i < projection.length; i++)
+            Log.i("InfoLog", "projection " + projection[0].toString());
+        Log.i("InfoLog", "projection " + projection[1].toString());
+        // intialize the Uri and the Cursor, and the current expected size.
+        Cursor c = null;
+        Uri u = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        Log.i("InfoLog", "FillPhoto Uri u " + u.toString());
+        // Query the Uri to get thedata path.  Only if th e Uri is valid.
+        if (u != null) {
+            c = managedQuery(u, projection, null, null, null);
+        }
+        // If we found the cursor and found a record in it (we also have the id).
+        if ((c != null) && (c.moveToFirst())) {
+            do {
+                // Loop each and add to the list.
+
+                GalleryList.add(c.getString(0)); // adding all the images sotred in the mobile phone(Internal and SD card)
+                GalleryListData.add(c.getString(1));
+                Log.d("data", c.getString(1));
+            }
+            while (c.moveToNext());
+        }
+        Log.i("INFOLOG", "gallery size " + GalleryList.size());
+        File last = new File(GalleryListData.get(GalleryListData.size() - 1));
+        Bitmap f1, f2;
+        f1 = BitmapFactory.decodeFile(last.getAbsolutePath(), new BitmapFactory.Options());
+        f2 = BitmapFactory.decodeFile(CurrentFile.getAbsolutePath(), new BitmapFactory.Options());
+        boolean iset = last.exists();
+        boolean issame = f1.sameAs(f2);
+
+        if (iset && issame) {
+            Log.d("xoa file", last.getName());
+            boolean tem = last.delete();
+            // update galery
+            this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(last)));
+            if (CurrentFile.exists()) {
+                CurrentFile.delete();
+                this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(CurrentFile)));
+                Log.d("xoa file", CurrentFile.getName());
+            }
+        }
+    }
+
+    File CurrentFile;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO Auto-generated method stub
@@ -441,6 +504,9 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
                             // image.delete();
                             mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(image)));
                             mProgess.dismiss();
+                            CurrentFile = new File(mCurrentPhotoPath);
+                            //xoa anh cu
+                            FillPhotoList(CurrentFile);
 
                         } catch (FileNotFoundException e) {
                             // TODO Auto-generated catch block
