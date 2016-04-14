@@ -1,2 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<items version="2" />
+<items version="2" >
+
+    <item
+        jar="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.2.1/jars/libs/internal_impl-23.2.1.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="607a3d0b8013b4ccbfeb0b7cb293351994e021fb">
+        <dex dex="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/pre-dexed/debug/internal_impl-23.2.1_fd286667f86f4654e95ef012aa709b3ddfaacf65.jar" />
+    </item>
+    <item
+        jar="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.2.1/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="3be474b1b21b31cf2fa93fe6bd641ae108d96452">
+        <dex dex="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/pre-dexed/debug/com.android.support-support-v4-23.2.1_0ffeeba4919389f51631b26a7787a9aef5aaa3ce.jar" />
+    </item>
+    <item
+        jar="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/23.2.1/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="3469cb457f10f74c28cbc05f069b6c894f6cbdd0">
+        <dex dex="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/pre-dexed/debug/com.android.support-animated-vector-drawable-23.2.1_420c19811a9cbd62621bb12ed82f5f930901553d.jar" />
+    </item>
+    <item
+        jar="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.2.1/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="e4d0cbb0b999604b349062f0214a0a228a7fd151">
+        <dex dex="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/pre-dexed/debug/com.android.support-appcompat-v7-23.2.1_456249af24f037fe243791730bec9f8099f62891.jar" />
+    </item>
+    <item
+        jar="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/23.2.1/jars/classes.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="673d77a5bbddd766037f088e775df525c46407f0">
+        <dex dex="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/pre-dexed/debug/com.android.support-support-vector-drawable-23.2.1_63db22222f1cd043ed5dee7e4afcfbb00ea7d9a8.jar" />
+    </item>
+    <item
+        jar="/home/hungmai/Study/Android/android-sdk-linux/extras/android/m2repository/com/android/support/support-annotations/23.2.1/support-annotations-23.2.1.jar"
+        jumboMode="false"
+        revision="23.0.3"
+        sha1="ccb693bc0774fcb637246f7360de25b4af7df318">
+        <dex dex="/home/hungmai/Study/Android/MyASWorkSpace/uFie/app/build/intermediates/pre-dexed/debug/support-annotations-23.2.1_7cd26a071e63f3aeb5edfdc9a074caff2b9148e7.jar" />
+    </item>
+
+</items>
