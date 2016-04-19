@@ -611,7 +611,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
             }
         });
 
-        MyBundle.mBroadcast.disconnectFromPeer();
+        //MyBundle.mBroadcast.disconnectFromPeer();
     }
 
     @Override
