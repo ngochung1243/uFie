@@ -29,6 +29,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -191,8 +192,8 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
+        File storageDir = Environment.getExternalStorageDirectory();
+        File f = Environment.getRootDirectory();
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -436,6 +437,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
                             is = cr.openInputStream(mImageUri);
                             MyBundle.mBroadcast.send(is);
+                            //MyBundle.mBroadcast.disconnectFromPeer();
 
                             File image = new File(mImagePath);
                             image.delete();
@@ -541,9 +543,16 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
                     mProgess.dismiss();
                 }
                 lvImageAdapter.notifyDataSetChanged();
+
+                Toast.makeText(mContext, "Received Data!!!", Toast.LENGTH_SHORT).show();
             }
         });
 
+        //MyBundle.mBroadcast.disconnectFromPeer();
+    }
+
+    @Override
+    public void onCompleteSendData() {
         MyBundle.mBroadcast.disconnectFromPeer();
     }
 

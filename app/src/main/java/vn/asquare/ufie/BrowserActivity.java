@@ -280,6 +280,7 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
         }
 
         mBroadcast.mP2PHandle.setReceiveDataListener((ReceiveSocketAsync.SocketReceiverDataListener)MainActivity.mContext);
+        mBroadcast.advertiseWifiP2P();
     }
 
     @Override
