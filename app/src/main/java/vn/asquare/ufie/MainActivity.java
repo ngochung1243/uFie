@@ -554,6 +554,9 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     @Override
     public void onCompleteSendData() {
         MyBundle.mBroadcast.disconnectFromPeer();
+//        WifiManager wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+//
+//        wifiManager.setWifiEnabled(false);
     }
 
     @Override

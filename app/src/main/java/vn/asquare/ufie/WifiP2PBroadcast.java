@@ -11,6 +11,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.widget.Toast;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 /**
  * Created by hungmai on 07/04/2016.
@@ -63,7 +64,6 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
     }
 
     public void connectPeer(WifiP2pConfig config){
-
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
 
             @Override
@@ -80,35 +80,38 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
     }
 
     public void disconnectFromPeer() {
-        mManager.removeGroup(mChannel, new WifiP2pManager.ActionListener() {
 
+        mManager.removeGroup(mChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                // TODO Auto-generated method stub
-                mManager.cancelConnect(mChannel, new WifiP2pManager.ActionListener() {
 
-                    @Override
-                    public void onSuccess() {
-                        // TODO Auto-generated method stub
-
-                    }
-
-                    @Override
-                    public void onFailure(int reason) {
-                        // TODO Auto-generated method stub
-
-                    }
-                });
             }
 
             @Override
             public void onFailure(int reason) {
-                // TODO Auto-generated method stub
 
             }
         });
 
+        deletePersistentGroups();
+
         mP2PHandle.disconnect();
+    }
+
+    private void deletePersistentGroups(){
+        try {
+            Method[] methods = WifiP2pManager.class.getMethods();
+            for (int i = 0; i < methods.length; i++) {
+                if (methods[i].getName().equals("deletePersistentGroup")) {
+                    // Delete any persistent group
+                    for (int netid = 0; netid < 32; netid++) {
+                        methods[i].invoke(mManager, mChannel, netid, null);
+                    }
+                }
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -136,11 +139,8 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
             NetworkInfo.State state = networkInfo.getState();
             if (state == NetworkInfo.State.CONNECTED){
 
-                if (MainActivity.mState == MainActivity.State.StateDefault){
-                    MainActivity.mState = MainActivity.State.StatePassive;
-                }
-
                 mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener)mP2PHandle);
+
             }else if (state == NetworkInfo.State.DISCONNECTED){
                 mListener.onDisconnect();
             }

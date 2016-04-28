@@ -19,13 +19,16 @@ public class ReceiveSocketAsync implements Runnable{
 
     onReceivedDataListener mReceivedDataListener;
 
+    int mPeer;
+
     Thread t;
 
-    public ReceiveSocketAsync(onReceivedDataListener receivedDataListener, SocketReceiverDataListener receiveListener, Socket receiveSocket) {
+    public ReceiveSocketAsync(onReceivedDataListener receivedDataListener, SocketReceiverDataListener receiveListener, Socket receiveSocket, int peer) {
         // TODO Auto-generated constructor stub
         mReceivedDataListener = receivedDataListener;
         mReceiveSocket = receiveSocket;
         mReceiveListener = receiveListener;
+        mPeer = peer;
     }
 
     @Override
@@ -52,7 +55,7 @@ public class ReceiveSocketAsync implements Runnable{
                         if (mReceiveListener != null){
                             mReceiveListener.onReceiveData(os.toByteArray());
 
-                            mReceivedDataListener.onCompleteReceivedData();
+                            mReceivedDataListener.onCompleteReceivedData(mPeer);
                         }
                     }
                 }
@@ -79,6 +82,6 @@ public class ReceiveSocketAsync implements Runnable{
     }
 
     public interface onReceivedDataListener{
-        public void onCompleteReceivedData();
+        public void onCompleteReceivedData(int peer);
     }
 }

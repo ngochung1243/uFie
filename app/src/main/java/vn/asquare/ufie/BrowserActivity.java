@@ -56,7 +56,6 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 // TODO Auto-generated method stub
-                MainActivity.mState = MainActivity.State.StateActive;
                 connectToPeer(position);
             }
         });

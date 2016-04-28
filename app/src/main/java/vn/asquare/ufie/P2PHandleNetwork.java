@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by hungmai on 07/04/2016.
@@ -20,8 +22,8 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
 
     ServerReceiveSocket_Thread serverReceiveThread;
     ServerSendSocket_Thread serverSendThread;
-    Socket mSendSocket;
-    Socket mReceiveSocket;
+    List<Socket> mSendSockets = new ArrayList<>();
+    List<Socket> mReceiveSockets = new ArrayList<>();
 
     ReceiveSocketAsync receiveThread;
 
@@ -30,7 +32,6 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
 
     public P2PHandleNetwork(){
         mReceiveDataListener = null;
-
     }
 
     public void setReceiveDataListener(ReceiveSocketAsync.SocketReceiverDataListener listener){
@@ -40,8 +41,13 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
 
     public void send(final InputStream is){
         try {
-            final OutputStream os = mSendSocket.getOutputStream();
-            FileTransferService.sendFile(is, os);
+            for (Socket mSendSocket:mSendSockets) {
+                if (!mSendSocket.isClosed()){
+                    final OutputStream os = mSendSocket.getOutputStream();
+                    FileTransferService.sendFile(is, os);
+                }
+            }
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -57,8 +63,28 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
             serverReceiveThread = null;
         }
 
-        mSendSocket = null;
-        mReceiveSocket = null;
+        closeAllSockets();
+    }
+
+    private void closeAllSockets(){
+        for(Socket mSendSocket:mSendSockets){
+            try {
+                mSendSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for(Socket mReceiveSocket:mReceiveSockets) {
+            try {
+                mReceiveSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        mSendSockets.clear();
+        mReceiveSockets.clear();
     }
 
     @Override
@@ -72,6 +98,9 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
         if (info.groupFormed){
             if (info.isGroupOwner){
                 try {
+
+                    MainActivity.mState = MainActivity.State.StateActive;
+
                     if (serverSendThread == null && serverReceiveThread == null){
                         serverReceiveThread = new ServerReceiveSocket_Thread(this);
                         serverReceiveThread.start();
@@ -83,9 +112,18 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
                     // TODO Auto-generated catch block
                 }
             }else {
-                mSendSocket = new Socket();
-                mReceiveSocket = new Socket();
-                receiveThread = new ReceiveSocketAsync(this, mReceiveDataListener, mReceiveSocket);
+
+                MainActivity.mState = MainActivity.State.StatePassive;
+
+                final Socket mSendSocket = new Socket();
+                final Socket mReceiveSocket = new Socket();
+
+                final int position = mReceiveSockets.size();
+
+                receiveThread = new ReceiveSocketAsync(this, mReceiveDataListener, mReceiveSocket, position);
+
+                mSendSockets.add(mSendSocket);
+                mReceiveSockets.add(mReceiveSocket);
 
                 Runnable runnable = new Runnable() {
 
@@ -125,25 +163,30 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
     @Override
     public void onReceive_SendSocket(Socket sendSocket) {
         // TODO Auto-generated method stub
-        mSendSocket = sendSocket;
+        Socket mSendSocket = sendSocket;
 
+        mSendSockets.add(mSendSocket);
     }
 
     @Override
     public void onReceive_ReceiveSocket(Socket receiveSocket) {
         // TODO Auto-generated method stub
-        mReceiveSocket = receiveSocket;
+        Socket mReceiveSocket = receiveSocket;
 
-        receiveThread = new ReceiveSocketAsync(this, mReceiveDataListener, receiveSocket);
+        int position = mReceiveSockets.size();
+
+        mReceiveSockets.add(mReceiveSocket);
+
+        receiveThread = new ReceiveSocketAsync(this, mReceiveDataListener, receiveSocket, position);
         receiveThread.start();
 
         mListener.onConnectComplete();
     }
 
     @Override
-    public void onCompleteReceivedData() {
+    public void onCompleteReceivedData(int peer) {
         try {
-            sendCodeReceivedData(mSendSocket.getOutputStream());
+            sendCodeReceivedData(mSendSockets.get(peer).getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
