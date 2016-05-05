@@ -8,6 +8,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.InputStream;
@@ -190,6 +191,7 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
         if(mP2PHandle.checkEmptyConnectionPeers()){
             deletePersistentGroups();
         }
+        Log.d("Disconnect", "Disconnected!!!");
     }
 
     public interface WifiP2PBroadcastListener{

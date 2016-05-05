@@ -3,6 +3,7 @@ package vn.asquare.ufie;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Handler;
+import android.os.Looper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -130,7 +131,7 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
             }
         }
 
-        Handler hd = new Handler();
+        Handler hd = new Handler(Looper.getMainLooper());
         hd.postDelayed(new Runnable() {
             @Override
             public void run() {
