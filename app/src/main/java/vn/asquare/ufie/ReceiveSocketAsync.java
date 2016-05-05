@@ -45,10 +45,10 @@ public class ReceiveSocketAsync implements Runnable{
 
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-                int received = FileTransferService.receiveFile(receiveInputStream, os);
-                if (received == 1){
+                int result = FileTransferService.receiveFile(receiveInputStream, os);
+                if (result == 1){
                     mReceiveListener.onCompleteSendData();
-                }else if (received == 0){
+                }else if (result == 0){
                     os.flush();
 
                     if (os.size() > 0){
@@ -58,6 +58,10 @@ public class ReceiveSocketAsync implements Runnable{
                             mReceivedDataListener.onCompleteReceivedData(mPeer);
                         }
                     }
+                }else if (result == 2){
+                    mReceivedDataListener.onPing(mPeer);
+                }else if (result == 3){
+                    mReceivedDataListener.onPingOK(mPeer);
                 }
             }
 
@@ -73,7 +77,7 @@ public class ReceiveSocketAsync implements Runnable{
     }
 
     public void stop(){
-        t.interrupt();
+
     }
 
     public interface SocketReceiverDataListener{
@@ -83,5 +87,7 @@ public class ReceiveSocketAsync implements Runnable{
 
     public interface onReceivedDataListener{
         public void onCompleteReceivedData(int peer);
+        public void onPing(int peer);
+        public void onPingOK(int peer);
     }
 }

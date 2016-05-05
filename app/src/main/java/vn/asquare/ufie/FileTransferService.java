@@ -95,6 +95,16 @@ public class FileTransferService {
                         break;
                     }
 
+                    if (checkPing(code)){
+                        result = 2;
+                        break;
+                    }
+
+                    if (checkPingOK(code)){
+                        result = 3;
+                        break;
+                    }
+
                     if (checkCode(code)) {
                         byte[] endFile = detectEndFile(oldBuf, oldLen);
                         if (checkEndFile(endFile)) {
@@ -177,6 +187,22 @@ public class FileTransferService {
 
     private static boolean checkReceivedCode(byte[] code){
         if (code[0] == '2' && code[1] == '5' && code[2] == '0' && code[3] == ' ') {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean checkPing(byte[] code){
+        if (code[0] == '3' && code[1] == '4' && code[2] == '0' && code[3] == ' ') {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean checkPingOK(byte[] code){
+        if (code[0] == '3' && code[1] == '6' && code[2] == '0' && code[3] == ' ') {
             return true;
         }
 

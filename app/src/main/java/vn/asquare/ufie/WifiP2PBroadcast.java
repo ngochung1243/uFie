@@ -142,7 +142,11 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
                 mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener)mP2PHandle);
 
             }else if (state == NetworkInfo.State.DISCONNECTED){
-                mListener.onDisconnect();
+                if (mP2PHandle.isGroupOwner){
+                    mP2PHandle.checkConnection();
+                }else{
+                    mListener.onDisconnect();
+                }
             }
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             // Respond to this device's wifi state changing
@@ -177,6 +181,14 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
         // TODO Auto-generated method stub
         if (mListener != null){
             mListener.onConnection();
+        }
+    }
+
+    @Override
+    public void onDisconnectComplete() {
+        mListener.onDisconnect();
+        if(mP2PHandle.checkEmptyConnectionPeers()){
+            deletePersistentGroups();
         }
     }
 
