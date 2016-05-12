@@ -11,6 +11,20 @@ import java.util.Arrays;
  */
 public class FileTransferService {
 
+    public static boolean sendCode(final InputStream inputStream, final OutputStream out){
+        int len = 0;
+        byte buf[] = new byte [4];
+        try {
+            while ((len = inputStream.read(buf)) != -1) {
+                out.write(buf, 0, len);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
     public static boolean sendFile(final InputStream inputStream, final OutputStream out) {
         byte buf[] = new byte[1024];
         int len;
@@ -44,12 +58,13 @@ public class FileTransferService {
         return true;
     }
 
-    public static boolean receiveFile(final InputStream inputStream, final OutputStream out) {
+    public static int receiveFile(final InputStream inputStream, final OutputStream out) {
         byte buf[] = new byte[1028];
         byte oldBuf[] = null;
         int len = 0;
         int oldLen = 0;
         int j = 0;
+        int result = -1;
 
         try {
             while ((len = inputStream.read(buf)) != -1) {
@@ -75,11 +90,33 @@ public class FileTransferService {
 
                     byte[] code = detectCode(oldBuf);
 
+                    if (checkReceivedCode(code)){
+                        result = 1;
+                        break;
+                    }
+
+                    if (checkPing(code)){
+                        result = 2;
+                        break;
+                    }
+
+                    if (checkPingOK(code)){
+                        result = 3;
+                        break;
+                    }
+
+//                    if (checkReceiveId(code)){
+//                        result = 4;
+//                        byte[] realBuf = getRealBuffer(buf, len, false);
+//                        out.write(realBuf, 0, len - 4);
+//                    }
+
                     if (checkCode(code)) {
                         byte[] endFile = detectEndFile(oldBuf, oldLen);
                         if (checkEndFile(endFile)) {
                             byte[] realBuf = getRealBuffer(oldBuf, oldLen, true);
                             out.write(realBuf, 0, oldLen - 6);
+                            result = 0;
                             break;
                         }
                     }
@@ -94,6 +131,7 @@ public class FileTransferService {
                     }
 
                     if (isEnd) {
+                        result = 0;
                         break;
                     }
                 }
@@ -102,7 +140,7 @@ public class FileTransferService {
         } catch (IOException e) {
 
         }
-        return true;
+        return result;
     }
 
     private static byte[] addCode(byte[] buffer, boolean endFile) {
@@ -147,6 +185,30 @@ public class FileTransferService {
 
     private static boolean checkCode(byte[] code) {
         if (code[0] == '2' && code[1] == '2' && code[2] == '0' && code[3] == ' ') {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean checkReceivedCode(byte[] code){
+        if (code[0] == '2' && code[1] == '5' && code[2] == '0' && code[3] == ' ') {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean checkPing(byte[] code){
+        if (code[0] == '3' && code[1] == '4' && code[2] == '0' && code[3] == ' ') {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean checkPingOK(byte[] code){
+        if (code[0] == '3' && code[1] == '6' && code[2] == '0' && code[3] == ' ') {
             return true;
         }
 

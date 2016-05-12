@@ -3,6 +3,7 @@ package vn.asquare.ufie;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 /**
@@ -16,12 +17,18 @@ public class ReceiveSocketAsync implements Runnable{
 
     public SocketReceiverDataListener mReceiveListener;
 
+    onReceivedDataListener mReceivedDataListener;
+
+    int mPeer;
+
     Thread t;
 
-    public ReceiveSocketAsync(SocketReceiverDataListener receiveListener, Socket receiveSocket) {
+    public ReceiveSocketAsync(onReceivedDataListener receivedDataListener, SocketReceiverDataListener receiveListener, Socket receiveSocket, int peer) {
         // TODO Auto-generated constructor stub
+        mReceivedDataListener = receivedDataListener;
         mReceiveSocket = receiveSocket;
         mReceiveListener = receiveListener;
+        mPeer = peer;
     }
 
     @Override
@@ -29,6 +36,8 @@ public class ReceiveSocketAsync implements Runnable{
         // TODO Auto-generated method stub
         try {
             InputStream receiveInputStream = mReceiveSocket.getInputStream();
+            OutputStream receivedOutputStream = mReceiveSocket.getOutputStream();
+
             while (true){
                 if (mReceiveSocket.isClosed()){
                     break;
@@ -36,15 +45,27 @@ public class ReceiveSocketAsync implements Runnable{
 
                 ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-                FileTransferService.receiveFile(receiveInputStream, os);
+                int result = FileTransferService.receiveFile(receiveInputStream, os);
+                if (result == 1){
+                    mReceiveListener.onCompleteSendData();
+                }else if (result == 0){
+                    os.flush();
 
-                os.flush();
+                    if (os.size() > 0){
+                        if (mReceiveListener != null){
+                            mReceiveListener.onReceiveData(os.toByteArray());
 
-                if (os.size() > 0){
-                    if (mReceiveListener != null){
-                        mReceiveListener.onReceiveData(os.toByteArray());
+                            mReceivedDataListener.onCompleteReceivedData(mPeer);
+                        }
                     }
+                }else if (result == 2){
+                    mReceivedDataListener.onPing(mPeer);
+                }else if (result == 3){
+                    mReceivedDataListener.onPingOK(mPeer);
                 }
+//                else if (result == 4){
+//
+//                }
             }
 
         } catch (IOException e) {
@@ -59,10 +80,17 @@ public class ReceiveSocketAsync implements Runnable{
     }
 
     public void stop(){
-        t.interrupt();
+
     }
 
     public interface SocketReceiverDataListener{
         public void onReceiveData(byte[] data);
+        public void onCompleteSendData();
+    }
+
+    public interface onReceivedDataListener{
+        public void onCompleteReceivedData(int peer);
+        public void onPing(int peer);
+        public void onPingOK(int peer);
     }
 }
