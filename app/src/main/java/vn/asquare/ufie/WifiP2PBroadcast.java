@@ -137,18 +137,21 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
             NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
             Toast.makeText(mContext.getApplicationContext(), "Connection change", Toast.LENGTH_SHORT).show();
 
-            NetworkInfo.State state = networkInfo.getState();
-            if (state == NetworkInfo.State.CONNECTED){
+//            NetworkInfo.State state = networkInfo.getState();
+//            if (state == NetworkInfo.State.CONNECTED){
+//
+//                mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener)mP2PHandle);
+//
+//            }else if (state == NetworkInfo.State.DISCONNECTED){
+//                if (mP2PHandle.isGroupOwner){
+//                    mP2PHandle.checkConnection();
+//                }else{
+//                    mListener.onDisconnect();
+//                }
+//            }
 
-                mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener)mP2PHandle);
+            mP2PHandle.checkConnection();
 
-            }else if (state == NetworkInfo.State.DISCONNECTED){
-                if (mP2PHandle.isGroupOwner){
-                    mP2PHandle.checkConnection();
-                }else{
-                    mListener.onDisconnect();
-                }
-            }
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
             // Respond to this device's wifi state changing
             Toast.makeText(mContext.getApplicationContext(), "Device change", Toast.LENGTH_SHORT).show();
@@ -192,6 +195,13 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
             deletePersistentGroups();
         }
         Log.d("Disconnect", "Disconnected!!!");
+    }
+
+    @Override
+    public void checkPingComplete(boolean isOK) {
+        if (isOK){
+            mManager.requestConnectionInfo(mChannel, (WifiP2pManager.ConnectionInfoListener)mP2PHandle);
+        }
     }
 
     public interface WifiP2PBroadcastListener{

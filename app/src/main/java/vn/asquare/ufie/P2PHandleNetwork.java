@@ -41,7 +41,9 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
     public void setReceiveDataListener(ReceiveSocketAsync.SocketReceiverDataListener listener){
         mReceiveDataListener = listener;
         for (ConnectedPeer peer:mConnectedPeers){
-            peer.mReceiveThread.mReceiveListener = listener;
+            if (peer != null){
+                peer.mReceiveThread.mReceiveListener = listener;
+            }
         }
     }
 
@@ -94,9 +96,12 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
 
     private void closeSocket(ConnectedPeer peer){
         try {
-            peer.mSendSocket.close();
-            peer.mReceiveSocket.close();
-            peer.mReceiveThread.stop();
+            if (peer.mSendSocket != null)
+                peer.mSendSocket.close();
+            if (peer.mReceiveSocket != null)
+                peer.mReceiveSocket.close();
+            if (peer.mReceiveThread != null)
+                peer.mReceiveThread.stop();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -125,7 +130,14 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
 
         for(ConnectedPeer peer:mConnectedPeers){
             try {
-                sendPing(peer.mSendSocket.getOutputStream());
+                if (peer != null){
+                    if (peer.mSendSocket != null){
+                        sendPing(peer.mSendSocket.getOutputStream());
+                    }else{
+                        int position = mConnectedPeers.indexOf(peer);
+                        mConnectedPeers.set(position, null);
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -135,11 +147,17 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
         hd.postDelayed(new Runnable() {
             @Override
             public void run() {
+                boolean isOK = true;
                 for (ConnectedPeer peer:mConnectedPeers){
-                    if (!peer.isAlive){
-                        closeSocket(peer);
+                    if (peer != null){
+                        if (!peer.isAlive){
+                            closeSocket(peer);
+                            isOK = false;
+                        }
                     }
                 }
+
+                mListener.checkPingComplete(isOK);
             }
         }, SOCKET_TIMEOUT);
     }
@@ -297,5 +315,6 @@ public class P2PHandleNetwork implements WifiP2pManager.ConnectionInfoListener, 
     public interface P2PHandleNetworkListener{
         public void onConnectComplete();
         public void onDisconnectComplete();
+        public void checkPingComplete(boolean isOK);
     }
 }

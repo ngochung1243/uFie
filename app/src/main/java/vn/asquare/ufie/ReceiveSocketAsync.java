@@ -63,6 +63,9 @@ public class ReceiveSocketAsync implements Runnable{
                 }else if (result == 3){
                     mReceivedDataListener.onPingOK(mPeer);
                 }
+//                else if (result == 4){
+//
+//                }
             }
 
         } catch (IOException e) {
