@@ -3,8 +3,6 @@ package vn.asquare.ufie;
 import android.app.Activity;
 import android.content.Context;
 import android.content.IntentFilter;
-import android.net.wifi.WpsInfo;
-import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
@@ -63,7 +61,6 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
         //startRegistration();
         mBroadcast.advertiseWifiP2P();
     }
-
 
     public class DeviceListAdapter extends ArrayAdapter<WifiP2pDevice> {
 
@@ -253,13 +250,15 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
 //    }
 
     private void connectToPeer(int position){
-        WifiP2pDevice device = mPeerList.get(position);
-        final WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = device.deviceAddress;
-        config.wps.setup = WpsInfo.PBC;
-        config.groupOwnerIntent = 15;
 
-        mBroadcast.connectPeer(config);
+//        WifiP2pDevice device = mPeerList.get(position);
+//        final WifiP2pConfig config = new WifiP2pConfig();
+//        config.deviceAddress = device.deviceAddress;
+//        config.wps.setup = WpsInfo.PBC;
+//        config.groupOwnerIntent = 0;
+//        mBroadcast.connectPeer(config);
+
+        mBroadcast.createGroup();
     }
 
     @Override
