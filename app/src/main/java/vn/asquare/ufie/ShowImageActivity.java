@@ -21,6 +21,12 @@ public class ShowImageActivity extends Activity {
         Intent mIntent = getIntent();
         String imagePath = mIntent.getStringExtra("ImagePath");
 
+        Bitmap bm = createBitmapWithPath(imagePath);
+
+        imvReceiveImage.setImageBitmap(bm);
+    }
+
+    public Bitmap createBitmapWithPath(String imagePath){
         final BitmapFactory.Options options = new BitmapFactory.Options();
 
         options.inJustDecodeBounds = true;
@@ -41,7 +47,8 @@ public class ShowImageActivity extends Activity {
         Bitmap oldbm = BitmapFactory.decodeFile(imagePath, options);
 
         Bitmap bm = MainActivity.createCorrectBitmap(imagePath, oldbm);
-        imvReceiveImage.setImageBitmap(bm);
+
+        return bm;
     }
 
     public static int calculateInSampleSize(
