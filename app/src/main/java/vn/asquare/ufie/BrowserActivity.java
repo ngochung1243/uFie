@@ -3,6 +3,8 @@ package vn.asquare.ufie;
 import android.app.Activity;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.net.wifi.WpsInfo;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
@@ -34,6 +36,8 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
     WifiP2pDnsSdServiceInfo serviceInfo;
     WifiP2pDnsSdServiceRequest serviceRequest;
 
+    int intentValue = 15;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // TODO Auto-generated method stub
@@ -54,11 +58,13 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 // TODO Auto-generated method stub
+
                 connectToPeer(position);
             }
         });
 
         //startRegistration();
+
         mBroadcast.advertiseWifiP2P();
     }
 
@@ -251,14 +257,18 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
 
     private void connectToPeer(int position){
 
-//        WifiP2pDevice device = mPeerList.get(position);
-//        final WifiP2pConfig config = new WifiP2pConfig();
-//        config.deviceAddress = device.deviceAddress;
-//        config.wps.setup = WpsInfo.PBC;
-//        config.groupOwnerIntent = 0;
-//        mBroadcast.connectPeer(config);
-
-        mBroadcast.createGroup();
+        WifiP2pDevice device = mPeerList.get(position);
+        final WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = device.deviceAddress;
+        config.wps.setup = WpsInfo.PBC;
+        mBroadcast.createGroup(config);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        mBroadcast.connectPeer(config);
+        //mBroadcast.connectPeer(config);
     }
 
     @Override

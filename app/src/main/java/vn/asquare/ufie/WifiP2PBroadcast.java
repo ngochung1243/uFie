@@ -67,7 +67,7 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
         });
     }
 
-    public void createGroup(){
+    public void createGroup(final WifiP2pConfig config){
         mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {

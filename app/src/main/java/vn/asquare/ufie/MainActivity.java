@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
 
         MyBundle.mBroadcast.register(filter);
         MyBundle.mBroadcast.advertiseWifiP2P();
+        //MyBundle.mBroadcast.createGroup();
     }
 
     public class ImageListAdapter extends ArrayAdapter<String> {
