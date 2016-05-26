@@ -10,6 +10,7 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -255,20 +256,22 @@ public class BrowserActivity extends Activity implements WifiP2PBroadcast.WifiP2
 //        });
 //    }
 
-    private void connectToPeer(int position){
+    private void connectToPeer(final int position){
 
-        WifiP2pDevice device = mPeerList.get(position);
-        final WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = device.deviceAddress;
-        config.wps.setup = WpsInfo.PBC;
-        mBroadcast.createGroup(config);
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        mBroadcast.connectPeer(config);
-        //mBroadcast.connectPeer(config);
+        mBroadcast.removeGroup();
+
+        Handler hd = new Handler();
+        hd.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                WifiP2pDevice device = mPeerList.get(position);
+                final WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceAddress = device.deviceAddress;
+                config.wps.setup = WpsInfo.PBC;
+
+                mBroadcast.connectPeer(config);
+            }
+        }, 1000);
     }
 
     @Override

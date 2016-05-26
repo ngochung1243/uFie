@@ -67,10 +67,24 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
         });
     }
 
-    public void createGroup(final WifiP2pConfig config){
+    public void createGroup(){
         mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
+            }
+
+            @Override
+            public void onFailure(int reason) {
+
+            }
+        });
+    }
+
+    public void removeGroup(){
+        mManager.removeGroup(mChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+
             }
 
             @Override
@@ -110,7 +124,7 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
             }
         });
 
-        deletePersistentGroups();
+        //deletePersistentGroups();
 
         mP2PHandle.disconnect();
     }
@@ -209,7 +223,7 @@ public class WifiP2PBroadcast extends BroadcastReceiver implements WifiP2pManage
     public void onDisconnectComplete() {
         mListener.onDisconnect();
         if(mP2PHandle.checkEmptyConnectionPeers()){
-            deletePersistentGroups();
+            //deletePersistentGroups();
         }
         Log.d("Disconnect", "Disconnected!!!");
     }

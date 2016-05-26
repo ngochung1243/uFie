@@ -124,8 +124,9 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
         filter.addAction(WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION);
 
         MyBundle.mBroadcast.register(filter);
+//        MyBundle.mBroadcast.advertiseWifiP2P();
+        MyBundle.mBroadcast.createGroup();
         MyBundle.mBroadcast.advertiseWifiP2P();
-        //MyBundle.mBroadcast.createGroup();
     }
 
     public class ImageListAdapter extends ArrayAdapter<String> {
@@ -666,6 +667,7 @@ public class MainActivity extends AppCompatActivity implements ReceiveSocketAsyn
     @Override
     public void onDisconnect() {
         // TODO Auto-generated method stub
+        MyBundle.mBroadcast.createGroup();
         MyBundle.mBroadcast.advertiseWifiP2P();
         mState = State.StateDefault;
     }
